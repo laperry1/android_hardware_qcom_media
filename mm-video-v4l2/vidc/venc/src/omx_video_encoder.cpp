@@ -529,11 +529,6 @@ OMX_ERRORTYPE  omx_venc::set_parameter(OMX_IN OMX_HANDLETYPE     hComp,
                     DEBUG_PRINT_LOW("i/p actual cnt requested = %lu", portDefn->nBufferCountActual);
                     DEBUG_PRINT_LOW("i/p min cnt requested = %lu", portDefn->nBufferCountMin);
                     DEBUG_PRINT_LOW("i/p buffersize requested = %lu", portDefn->nBufferSize);
-                    if (portDefn->nBufferCountActual > MAX_NUM_INPUT_BUFFERS) {
-                        DEBUG_PRINT_ERROR("ERROR: (In_PORT) actual count (%u) exceeds max(%u)",
-                                (unsigned int)portDefn->nBufferCountActual, (unsigned int)MAX_NUM_INPUT_BUFFERS);
-                        return OMX_ErrorUnsupportedSetting;
-                    }
                     if (portDefn->nBufferCountMin > portDefn->nBufferCountActual) {
                         DEBUG_PRINT_ERROR("ERROR: (In_PORT) Min buffers (%lu) > actual count (%lu)",
                                 portDefn->nBufferCountMin, portDefn->nBufferCountActual);
@@ -582,11 +577,6 @@ OMX_ERRORTYPE  omx_venc::set_parameter(OMX_IN OMX_HANDLETYPE     hComp,
                     DEBUG_PRINT_LOW("o/p actual cnt requested = %lu", portDefn->nBufferCountActual);
                     DEBUG_PRINT_LOW("o/p min cnt requested = %lu", portDefn->nBufferCountMin);
                     DEBUG_PRINT_LOW("o/p buffersize requested = %lu", portDefn->nBufferSize);
-                    if (portDefn->nBufferCountActual > MAX_NUM_OUTPUT_BUFFERS) {
-                        DEBUG_PRINT_ERROR("ERROR: (Out_PORT) actual count (%u) exceeds max(%u)",
-                                (unsigned int)portDefn->nBufferCountActual, (unsigned int)MAX_NUM_OUTPUT_BUFFERS);
-                        return OMX_ErrorUnsupportedSetting;
-                    }
                     if (portDefn->nBufferCountMin > portDefn->nBufferCountActual) {
                         DEBUG_PRINT_ERROR("ERROR: (Out_PORT) Min buffers (%lu) > actual count (%lu)",
                                 portDefn->nBufferCountMin, portDefn->nBufferCountActual);
@@ -1723,14 +1713,7 @@ OMX_ERRORTYPE  omx_venc::component_deinit(OMX_IN OMX_HANDLETYPE hComp)
     if (m_out_mem_ptr) {
         DEBUG_PRINT_LOW("Freeing the Output Memory");
         for (i=0; i< m_sOutPortDef.nBufferCountActual; i++ ) {
-            if (BITMASK_PRESENT(&m_out_bm_count, i)) {
-                BITMASK_CLEAR(&m_out_bm_count, i);
-                free_output_buffer (&m_out_mem_ptr[i]);
-            }
-
-            if (release_output_done()) {
-                break;
-            }
+            free_output_buffer (&m_out_mem_ptr[i]);
         }
         free(m_out_mem_ptr);
         m_out_mem_ptr = NULL;
@@ -1744,14 +1727,7 @@ OMX_ERRORTYPE  omx_venc::component_deinit(OMX_IN OMX_HANDLETYPE hComp)
        ) {
         DEBUG_PRINT_LOW("Freeing the Input Memory");
         for (i=0; i<m_sInPortDef.nBufferCountActual; i++ ) {
-            if (BITMASK_PRESENT(&m_inp_bm_count, i)) {
-                BITMASK_CLEAR(&m_inp_bm_count, i);
-                free_input_buffer (&m_inp_mem_ptr[i]);
-            }
-
-            if (release_input_done()) {
-                break;
-            }
+            free_input_buffer (&m_inp_mem_ptr[i]);
         }
 
 
